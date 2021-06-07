@@ -46,7 +46,6 @@ const styles = () => {
 // ===================================================
 // HTML ============= HTML ====================== HTML
 const htmlInclude = () => {
-   // return src(['./src/**/*.html'])
    return src(['./src/**/index.html'])
       .pipe(fileinclude({
          prefix: '@',
@@ -87,26 +86,31 @@ const fonts = () => {
       .pipe(dest('./app/fonts/'));
 };
 // ====================================================
+/*Тут мой костыль: первый запуск галпа для того чтоб сработал миксин 
+Так как после первого запуска появляется include в  fonts.scss при втором запуске мы уже можем 
+использовать его в работе .*/
 const cb = () => { };
 let srcFonts = './src/scss/basic/_fonts.scss';
 let appFonts = './app/fonts/';
 const fontsStyle = (done) => {
    let file_content = fs.readFileSync(srcFonts);
-   fs.writeFile(srcFonts, '', cb);
-   fs.readdir(appFonts, function (err, items) {
-      if (items) {
-         let c_fontname;
-         for (var i = 0; i < items.length; i++) {
-            let fontname = items[i].split('.');
-            fontname = fontname[0];
-            if (c_fontname != fontname) {
-               fs.appendFile(srcFonts, '@include font("' + fontname + '", "' + fontname + '", 400, "normal");\r\n', cb);
+   if (file_content == '') {
+      fs.writeFile(srcFonts, '', cb);
+      return fs.readdir(appFonts, function (err, items) {
+         if (items) {
+            let c_fontname;
+            for (var i = 0; i < items.length; i++) {
+               let fontname = items[i].split('.');
+               fontname = fontname[0];
+               let fnn = fontname.split('-');
+               if (c_fontname != fontname) {
+                  fs.appendFile(srcFonts, '@include font("' + fnn[0] + '", "' + fontname + '",  ' + fnn[1] + ' , "normal");\r\n', cb);
+               }
+               c_fontname = fontname;
             }
-            c_fontname = fontname;
          }
-      }
-   });
-
+      });
+   }
    done();
 };
 // FONTS ======================================== FONTS
@@ -175,5 +179,8 @@ const watchFiles = () => {
 exports.styles = styles;
 exports.watchFiles = watchFiles;
 exports.fileinclude = htmlInclude;
+exports.fontsStyle = fontsStyle;
+exports.fonts = fonts;
 
-exports.default = series(clean, parallel(htmlInclude, scripts, fonts, resources, imgToApp), fontsStyle, styles, watchFiles);
+
+exports.default = series(clean, parallel(htmlInclude, styles, scripts, resources, imgToApp), fonts, fontsStyle, watchFiles);
