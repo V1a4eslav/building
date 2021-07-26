@@ -46,7 +46,7 @@ const styles = () => {
 // ===================================================
 // HTML ============= HTML ====================== HTML
 const htmlInclude = () => {
-   return src(['./src/**/index.html'])
+   return src(['./src/**/*.html'])
       .pipe(fileinclude({
          prefix: '@',
          basepath: '@file'
@@ -60,7 +60,7 @@ const htmlInclude = () => {
 // ===================================================
 // IMG ================= IMG ===================== IMG
 const imgToApp = () => {
-   return src(['./src/img/**.jpg', './src/img/**.png', './src/img/**.jpeg', './src/img/**.svg'])
+   return src(['./src/img/**/*.jpg', './src/img/**/*.png', './src/img/**/*.jpeg', './src/img/**/*.svg'])
       .pipe(dest('./app/img'));
 };
 // IMG ============================================ IMG
@@ -70,7 +70,7 @@ const imgToApp = () => {
 // RESOURCES ========== RESOURCES =========== RESOURCES
 const resources = () => {
    return src(['./src/resources/**'])
-      .pipe(dest('./app'));
+      .pipe(dest('./app/resources'));
 };
 // RESOURCES ================================ RESOURCES
 // ====================================================
@@ -154,7 +154,10 @@ const scripts = () => {
       .pipe(browserSync.stream());
 };
 
-
+const libs = () => {
+   return src(['./src/js/libs/**'])
+      .pipe(dest('./app/js/libs'));
+};
 
 const watchFiles = () => {
    browserSync.init({
@@ -183,4 +186,4 @@ exports.fontsStyle = fontsStyle;
 exports.fonts = fonts;
 
 
-exports.default = series(clean, parallel(htmlInclude, styles, scripts, resources, imgToApp), fonts, fontsStyle, watchFiles);
+exports.default = series(clean, parallel(htmlInclude, styles, scripts, libs, resources, imgToApp), fonts, fontsStyle, watchFiles);
